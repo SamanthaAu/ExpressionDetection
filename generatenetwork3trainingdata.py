@@ -74,7 +74,6 @@ for imgFile in imgFiles:
 		results = hands.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
 
 		if results.multi_hand_landmarks:
-			print("some" + imgFile)
 			if len(results.multi_handedness) == 2:
 				hand_state = HandState.BOTH
 			else:
@@ -105,7 +104,6 @@ for imgFile in imgFiles:
 
 		else:
 			hand_state = HandState.NONE
-			print("none" + imgFile)
 			for i in range(2*21*3):
 				landmarks_list_formatted.append(0.0)
 		
