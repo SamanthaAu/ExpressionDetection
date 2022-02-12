@@ -25,7 +25,18 @@ y=None
 labels = ['Angry', 'Disgust', 'Fear', 'Happy', 'Sad', 'Surprise', 'Neutral']
 
 #loading image
-full_size_image = cv2.imread("myPics/sad.jpg") # disgust, surprise, neutral
+full_size_image = cv2.imread("test1.jpg") 
+'''
+    my happy (happy.jpg): angry
+    online happy (happy2.jpeg): happy 
+    my sad (sad.jpg): fear
+    online sad (sad2.jpeg): sad
+    my surprise: angry
+    my fear: fear
+    my discust: angry
+    my angry: angry
+    my neutral: angry
+'''
 print("Image Loaded")
 gray=cv2.cvtColor(full_size_image,cv2.COLOR_RGB2GRAY)
 face = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
@@ -38,10 +49,13 @@ for (x, y, w, h) in faces:
     cv2.normalize(cropped_img, cropped_img, alpha=0, beta=1, norm_type=cv2.NORM_L2, dtype=cv2.CV_32F)
     cv2.rectangle(full_size_image, (x, y), (x + w, y + h), (0, 255, 0), 1)
     #predicting the emotion
-    yhat= loaded_model.predict(cropped_img)
+    yhat= loaded_model.predict(cropped_img)[0]
     print(yhat)
     cv2.putText(full_size_image, labels[int(np.argmax(yhat))], (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 1, cv2.LINE_AA)
     print("Emotion: "+labels[int(np.argmax(yhat))])
+    confidence = {labels[0]:yhat[0], labels[1]:yhat[1], labels[2]:yhat[2], labels[3]:yhat[3], labels[4]:yhat[4], labels[5]:yhat[5], labels[6]:yhat[6]}
+    print(confidence)
+    
 
 cv2.imshow('Emotion', full_size_image)
 cv2.waitKey(3000)

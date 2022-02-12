@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 import mediapipe as mp
 mp_hands = mp.solutions.hands
 
@@ -20,8 +21,18 @@ def hand_keypoints(img_file):
       image_height, image_width, _ = image.shape
       annotated_image = image.copy()
       for hand_landmarks in results.multi_hand_landmarks:
-        landmarks_list.append(hand_landmarks)
+        landmarks_list.append(np.array(hand_landmarks.landmark))
+
   return landmarks_list
 
 landmarks = hand_keypoints("hands.jpeg")
-print(landmarks)
+landmarks_list_formatted = []
+
+for hand in range(2):
+  for point in range(21):
+    landmarks_list_formatted.append(landmarks[hand][point].x)
+    landmarks_list_formatted.append(landmarks[hand][point].y)
+    landmarks_list_formatted.append(landmarks[hand][point].z)
+
+landmarks_list_formatted = np.array(landmarks_list_formatted)
+print(landmarks_list_formatted)
