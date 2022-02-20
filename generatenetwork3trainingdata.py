@@ -1,7 +1,3 @@
-# test result changes, csv file
-
-# emotion, array
-
 from __future__ import division
 from keras.models import Sequential
 from keras.layers import Dense
@@ -16,12 +12,13 @@ from google.protobuf.json_format import MessageToDict
 from os.path import exists
 import csv
 
-mp_hands = mp.solutions.hands
-
 json_file = open('fer.json', 'r')
 loaded_model_json = json_file.read()
 json_file.close()
 loaded_model = model_from_json(loaded_model_json)
+loaded_model.load_weights("fer.h5")
+
+mp_hands = mp.solutions.hands
 class HandState(Enum):
 	LEFT = 1
 	RIGHT = 2
@@ -61,6 +58,7 @@ for imgFile in imgFiles:
 
 	roi_gray = gray[y:y + h, x:x + w]
 	cropped_img = np.expand_dims(np.expand_dims(cv2.resize(roi_gray, (48, 48)), -1), 0)
+
 	cv2.normalize(cropped_img, cropped_img, alpha=0, beta=1, norm_type=cv2.NORM_L2, dtype=cv2.CV_32F)
 	cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 1)
 	yhat = loaded_model.predict(cropped_img)[0].tolist()
