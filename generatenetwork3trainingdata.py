@@ -1,22 +1,17 @@
-from __future__ import division
-from keras.models import Sequential
-from keras.layers import Dense
 from keras.models import model_from_json
-import numpy
-import os
 import numpy as np
 import cv2
 import mediapipe as mp
 from enum import Enum
 from google.protobuf.json_format import MessageToDict
-from os.path import exists
 import csv
+from os.path import exists
 
 json_file = open('fer.json', 'r')
 loaded_model_json = json_file.read()
 json_file.close()
 loaded_model = model_from_json(loaded_model_json)
-loaded_model.load_weights("fer.h5")
+# loaded_model.load_weights("fer.h5")
 
 mp_hands = mp.solutions.hands
 class HandState(Enum):
@@ -107,16 +102,19 @@ for imgFile in imgFiles:
 		
 	combined_list = yhat + landmarks_list_formatted 
 	combined_list.append(int(np.argmax(yhat)))
+	data_list = [str(elmt) for elmt in combined_list][0 : len(combined_list) - 1]
+
 	
+	file_exists = exists('combined.csv')
+
 	with open('combined.csv', 'a', newline='') as csvfile:
 		fieldnames = ['data_values', 'emotion']
 		writer = csv.DictWriter(csvfile, fieldnames = fieldnames)
+		
+		if not file_exists:
+			writer.writeheader()
 
-		data_list = [str(elmt) for elmt in combined_list][0 : len(combined_list) - 1]
-		writer.writerow({'data_values': " ".join(data_list), 'emotion': combined_list[len(combined_list) - 1]})
-	
-
-	
-	
+		writer.writerow({"data_values": " ".join(data_list), "emotion": combined_list[len(combined_list) - 1]})
+		
 
 
