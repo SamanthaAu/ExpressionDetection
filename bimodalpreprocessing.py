@@ -19,6 +19,7 @@ for xseq in datapoints:
 X = np.asarray(X)
 X = np.expand_dims(X, -1)
 
+
 # getting labels for training
 y = pd.get_dummies(data['emotion']).values
 

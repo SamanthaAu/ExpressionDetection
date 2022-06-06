@@ -11,7 +11,8 @@ json_file = open('fer.json', 'r')
 loaded_model_json = json_file.read()
 json_file.close()
 loaded_model = model_from_json(loaded_model_json)
-# loaded_model.load_weights("fer.h5")
+loaded_model.load_weights("fer.h5")
+print("Loaded model from disk")
 
 mp_hands = mp.solutions.hands
 class HandState(Enum):
@@ -21,35 +22,26 @@ class HandState(Enum):
 	NONE = 4
 hand_state = HandState.NONE
 
-print("Loaded model from disk")
+labels = ['angry', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+txtFile = open('filepaths.txt', 'r')
+filenames = txtFile.read().split(',')[1100:1200]
+txtFile.close()
 
-WIDTH = 48
-HEIGHT = 48
-x=None
-y=None
-labels = ['Angry', 'Disgust', 'Fear', 'Happy', 'Sad', 'Surprise', 'Neutral']
 
-mp_hands = mp.solutions.hands
-
-# create csv file where 1st N columns are face landmarks --> next M columns are hand landmarks --> final column is class
-
-'''
-	for loop to loop thru imgs DONE
-		- predict face --> yhat (7 length) DONE
-		- predict hand vector --> landmarks (2 * 21 * 3 length) 
-		- join together --> convert to list of decimals --> pass to csv writer to write a new row
-'''
-
-imgFiles = ["test1.jpg", "test2.jpg", "test3.jpg", "test4.jpg", "test5.jpg"]
-for imgFile in imgFiles:
+for imgFile in filenames:
 
 	img = cv2.imread(imgFile)
+	emotion = imgFile[7:imgFile.find('/', 7)]	
 
 	# facial expression
 	gray=cv2.cvtColor(img,cv2.COLOR_RGB2GRAY)
-	faceClass = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-	face = faceClass.detectMultiScale(gray, 1.3  , 10)[0]
-	x, y, w, h = face[0], face[1], face[2], face[3]
+	try:
+		faceClass = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+		face = faceClass.detectMultiScale(gray, 1.3  , 10)[0]
+		x, y, w, h = face[0], face[1], face[2], face[3]
+	except IndexError:
+		continue
+	
 
 	roi_gray = gray[y:y + h, x:x + w]
 	cropped_img = np.expand_dims(np.expand_dims(cv2.resize(roi_gray, (48, 48)), -1), 0)
@@ -101,20 +93,20 @@ for imgFile in imgFiles:
 				landmarks_list_formatted.append(0.0)
 		
 	combined_list = yhat + landmarks_list_formatted 
-	combined_list.append(int(np.argmax(yhat)))
-	data_list = [str(elmt) for elmt in combined_list][0 : len(combined_list) - 1]
+	print(type(yhat), type(landmarks_list_formatted))
+	# combined_list.append(labels.index(emotion))
+	# data_list = [str(elmt) for elmt in combined_list][0 : len(combined_list) - 1]
 
 	
-	file_exists = exists('combined.csv')
+	# file_exists = exists('combined2.csv')
 
-	with open('combined.csv', 'a', newline='') as csvfile:
-		fieldnames = ['data_values', 'emotion']
-		writer = csv.DictWriter(csvfile, fieldnames = fieldnames)
+	# with open('combined2.csv', 'a', newline='') as csvfile:
+	# 	fieldnames = ['data_values', 'emotion']
+	# 	writer = csv.DictWriter(csvfile, fieldnames = fieldnames)
 		
-		if not file_exists:
-			writer.writeheader()
+	# 	if not file_exists:
+	# 		writer.writeheader()
 
-		writer.writerow({"data_values": " ".join(data_list), "emotion": combined_list[len(combined_list) - 1]})
-		
-
+	# 	writer.writerow({"data_values": " ".join(data_list), "emotion": combined_list[len(combined_list) - 1]})
+			
 

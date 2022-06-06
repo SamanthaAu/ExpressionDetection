@@ -39,7 +39,6 @@ model.add(Dense(2*num_features, activation='relu'))
 model.add(Dropout(0.5))
 
 model.add(Dense(num_labels, activation='softmax'))
-model.summary()
 
 model.compile(loss=categorical_crossentropy,
               optimizer=Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-7),
@@ -57,6 +56,7 @@ with open("combinedfer.json", "w") as json_file:
     json_file.write(fer_json)
 model.save_weights("combinedfer.h5")
 print("Saved model to disk")
+model.summary()
 
 ''' 
 define neural network model (91 stuff)
