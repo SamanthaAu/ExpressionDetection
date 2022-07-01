@@ -3,7 +3,7 @@ import numpy as np
 import warnings
 warnings.filterwarnings("ignore")
 
-data = pd.read_csv('./combined.csv')
+data = pd.read_csv('./data.csv')
 
 width, height = 19, 7
 

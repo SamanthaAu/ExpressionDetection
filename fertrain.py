@@ -2,39 +2,61 @@ import sys, os
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
+from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, Activation, Flatten
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, BatchNormalization
 from tensorflow.keras.losses import categorical_crossentropy
 from tensorflow.keras.optimizers import Adam
 from keras.regularizers import l2
+import matplotlib.pyplot as plt
 
 num_features = 64
 num_labels = 7
 batch_size = 64
-epochs = 100
-width, height = 48, 48
+epochs = 25
+width, height = 72, 72
 
 x = np.load('./fdataX.npy')
 y = np.load('./flabels.npy')
 
-x -= np.mean(x, axis = 0)
-x /= np.std(x, axis = 0)
-
-#for xx in range(10):
+# for xx in range(10):
 #    plt.figure(xx)
-#    plt.imshow(x[xx].reshape((48, 48)), interpolation='none', cmap='gray')
-#plt.show()
+#    plt.imshow(x[xx].reshape((72, 72)), interpolation='none', cmap='gray')
+# plt.show()
 
 # splitting into training, validation, testing data
 X_train, X_test, y_train, y_test = train_test_split(x, y, test_size = 0.1, random_state = 42)
 X_train, X_valid, y_train, y_valid = train_test_split(X_train, y_train, test_size = 0.1, random_state = 41)
 
+X_train = X_train.astype(np.uint8)
+X_test = X_test.astype(np.uint8)
+X_valid = X_valid.astype(np.uint8)
+
 # saving the test samples to be used later
 np.save('modXtest', X_test)
 np.save('modytest', y_test)
+np.save('modXvalid', X_valid)
+np.save('modyvalid', y_valid)
+np.save('modXtrain', X_train)
+np.save('modytrain', y_train)
+
+X_train = X_train.astype(np.float64)
+X_test = X_test.astype(np.float64)
+X_valid = X_valid.astype(np.float64)
+
+X_train -= np.mean(X_train, axis = 0)
+X_train /= np.std(X_train, axis = 0)
+
+X_test -= np.mean(X_test, axis = 0)
+X_test /= np.std(X_test, axis = 0)
+
+X_valid -= np.mean(X_valid, axis = 0)
+X_valid /= np.std(X_valid, axis = 0)
+
 
 # desinging the CNN
+# early_stopping = EarlyStopping(monitor='val_loss', patience=3)
 model = Sequential()
 
 model.add(Conv2D(num_features, kernel_size=(3, 3), activation='relu', input_shape=(width, height, 1), data_format='channels_last', kernel_regularizer=l2(0.01)))
@@ -78,20 +100,42 @@ model.summary()
 
 # compliling the model with adam optimizer and categorical crossentropy loss
 model.compile(loss=categorical_crossentropy,
-              optimizer=Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-7),
+              optimizer=Adam(lr=0.00001, beta_1=0.9, beta_2=0.999, epsilon=1e-7),
               metrics=['accuracy'])
 
 # training the model
-model.fit(np.array(X_train), np.array(y_train),
+history = model.fit(np.array(X_train), np.array(y_train),
           batch_size=batch_size,
           epochs=epochs,
           verbose=1,
           validation_data=(np.array(X_valid), np.array(y_valid)),
-          shuffle=True)
+          shuffle=True,
+          #callbacks=[early_stopping]
+)
+print(history.history.keys())
+print(history.history['loss'])
+print(history.history['val_loss'])
 
 # saving the  model to be used later
 fer_json = model.to_json()
-with open("fer.json", "w") as json_file:
+with open("fer100.json", "w") as json_file:
     json_file.write(fer_json)
-model.save_weights("fer.h5")
+model.save_weights("fer100.h5")
 print("Saved model to disk")
+
+
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['val_accuracy'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show()
+
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('model loss')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show()

@@ -42,7 +42,7 @@ WIDTH = 19
 HEIGHT = 7
 x=None
 y=None
-labels = ['angry', 'disgust', 'fear', 'happy', 'sad', 'surprise', 'neutral']
+labels = ['angry', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
 txtFile = open('testFilepaths.txt', 'r')
 filenames = txtFile.read().split(',')[:-1]
 j=0
@@ -58,7 +58,7 @@ for imgFile in filenames:
     x, y, w, h = face[0], face[1], face[2], face[3]
 
     roi_gray = gray[y:y + h, x:x + w]
-    cropped_img = np.expand_dims(np.expand_dims(cv2.resize(roi_gray, (48, 48)), -1), 0)
+    cropped_img = np.expand_dims(np.expand_dims(cv2.resize(roi_gray, (72, 72)), -1), 0)
     cv2.normalize(cropped_img, cropped_img, alpha=0, beta=1, norm_type=cv2.NORM_L2, dtype=cv2.CV_32F)
     cv2.rectangle(full_size_image, (x, y), (x + w, y + h), (0, 255, 0), 1)
     #predicting the emotion

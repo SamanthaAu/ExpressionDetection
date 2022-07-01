@@ -24,31 +24,36 @@ hand_state = HandState.NONE
 
 labels = ['angry', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
 txtFile = open('filepaths.txt', 'r')
-filenames = txtFile.read().split(',')[1100:1200]
+filenames = txtFile.read().split(',')
 txtFile.close()
 
 
-for imgFile in filenames:
+X_train = np.load('./modXtrain.npy')
 
-	img = cv2.imread(imgFile)
-	emotion = imgFile[7:imgFile.find('/', 7)]	
+for gray in X_train:
+    
+	# print(gray)
+	# use img from pixels instead of from file name
+	# img = cv2.imread(imgFile)
+	# emotion = imgFile[7:imgFile.find('/', 7)]	
 
-	# facial expression
-	gray=cv2.cvtColor(img,cv2.COLOR_RGB2GRAY)
-	try:
-		faceClass = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-		face = faceClass.detectMultiScale(gray, 1.3  , 10)[0]
-		x, y, w, h = face[0], face[1], face[2], face[3]
-	except IndexError:
-		continue
+	# # facial expression
+	# gray=cv2.cvtColor(img,cv2.COLOR_RGB2GRAY)
+	# try:
+	# 	faceClass = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+	# 	face = faceClass.detectMultiScale(gray, 1.3  , 10)[0]
+	# 	x, y, w, h = face[0], face[1], face[2], face[3]
+	# except IndexError:
+	# 	continue
 	
 
-	roi_gray = gray[y:y + h, x:x + w]
-	cropped_img = np.expand_dims(np.expand_dims(cv2.resize(roi_gray, (48, 48)), -1), 0)
+	# roi_gray = gray[y:y + h, x:x + w]
+	# cropped_img = np.expand_dims(np.expand_dims(cv2.resize(roi_gray, (72, 72)), -1), 0)
 
-	cv2.normalize(cropped_img, cropped_img, alpha=0, beta=1, norm_type=cv2.NORM_L2, dtype=cv2.CV_32F)
-	cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 1)
+	# cv2.normalize(cropped_img, cropped_img, alpha=0, beta=1, norm_type=cv2.NORM_L2, dtype=cv2.CV_32F)
+	# cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 1)
 	yhat = loaded_model.predict(cropped_img)[0].tolist()
+	print(yhat)
 
 	# hands keypoint
 	landmarks_list = []
@@ -93,20 +98,19 @@ for imgFile in filenames:
 				landmarks_list_formatted.append(0.0)
 		
 	combined_list = yhat + landmarks_list_formatted 
-	print(type(yhat), type(landmarks_list_formatted))
-	# combined_list.append(labels.index(emotion))
-	# data_list = [str(elmt) for elmt in combined_list][0 : len(combined_list) - 1]
 
+	print(imgFile, str(labels.index(emotion)))
+
+	combined_list.append(labels.index(emotion))
+	data_list = [str(elmt) for elmt in combined_list][0 : len(combined_list) - 1]
 	
-	# file_exists = exists('combined2.csv')
+	file_exists = exists('combined.csv')
 
-	# with open('combined2.csv', 'a', newline='') as csvfile:
-	# 	fieldnames = ['data_values', 'emotion']
-	# 	writer = csv.DictWriter(csvfile, fieldnames = fieldnames)
+	with open('combined.csv', 'a', newline='') as csvfile:
+		fieldnames = ['data_values', 'emotion']
+		writer = csv.DictWriter(csvfile, fieldnames = fieldnames)
 		
-	# 	if not file_exists:
-	# 		writer.writeheader()
+		if not file_exists:
+			writer.writeheader()
 
-	# 	writer.writerow({"data_values": " ".join(data_list), "emotion": combined_list[len(combined_list) - 1]})
-			
-
+		writer.writerow({"data_values": " ".join(data_list), "emotion": combined_list[len(combined_list) - 1]})

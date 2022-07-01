@@ -15,17 +15,16 @@ batch_size = 64
 epochs = 100
 width, height = 19, 7
 
-x = np.load('./combinedfdataX.npy')
-y = np.load('./combinedfLabels.npy')
+x = np.load('./fdataX.npy')
+y = np.load('./flabels.npy')
 
 x -= np.mean(x, axis = 0)
 x /= np.std(x, axis = 0)
 
-X_train, X_test, y_train, y_test = train_test_split(x, y, test_size = 0.1, random_state = 42)
-X_train, X_valid, y_train, y_valid = train_test_split(X_train, y_train, test_size = 0.1, random_state = 41)
-
-np.save('combinedModXtest', X_test)
-np.save('combinedModytest', y_test)
+X_train = np.load('./modXtrain.npy')
+y_train = np.load('./modytrain.npy')
+X_valid = np.load('./modXvalid.npy')
+y_valid = np.load('./modyvalid.npy')
 
 model = Sequential()
 

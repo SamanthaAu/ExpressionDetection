@@ -3,9 +3,9 @@ import numpy as np
 import warnings
 warnings.filterwarnings("ignore")
 
-data = pd.read_csv('./fer2013.csv')
+data = pd.read_csv('./data.csv')
 
-width, height = 48, 48
+width, height = 72, 72
 
 datapoints = data['pixels'].tolist()
 

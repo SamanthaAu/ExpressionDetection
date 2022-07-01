@@ -17,8 +17,8 @@ print("Loaded model from disk")
 
 truey=[]
 predy=[]
-x = np.load('./combinedModXtest.npy')
-y = np.load('./combinedModytest.npy')
+x = np.load('./modXtest.npy')
+y = np.load('./moytest.npy')
 
 yhat= loaded_model.predict(x)
 yh = yhat.tolist()
